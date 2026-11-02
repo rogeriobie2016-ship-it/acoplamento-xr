@@ -46,7 +46,7 @@ button{font:inherit;color:inherit}
 #menu{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:minmax(0,1fr) 420px;pointer-events:none}
 #menu > *{pointer-events:auto}
 .brand{align-self:end;padding:0 0 48px 56px;max-width:640px;pointer-events:none!important}
-.brand h1{font-weight:300;font-size:clamp(44px,7vw,96px);letter-spacing:.32em;margin:10px 0 14px;line-height:1}
+.brand h1{font-weight:300;font-size:clamp(40px,5.2vw,96px);letter-spacing:.32em;margin:10px 0 14px;line-height:1}
 .brand p{font-size:17px;line-height:1.55;color:var(--dim);font-weight:300;margin:0;max-width:520px}
 .side{background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.72) 18%);padding:40px 40px 32px 56px;display:flex;flex-direction:column;gap:14px;overflow:auto}
 .side .kicker{margin-bottom:4px}
@@ -1286,6 +1286,7 @@ const mapCam = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.01, 3
 const map = { markers: [], labels: [], ship: null, path: [], trail: null, t: 0 };
 const MAPCAM = [{ pos: [9, 3.6, 25], look: [11.6, -3.8, -3] }, { pos: [8.5, 14, 30], look: [8.5, -4.5, -3] }];
 function buildMap() {
+  mapCam.position.set(...MAPCAM[innerWidth < 900 ? 1 : 0].pos);
   const sunDir = V3(-0.5, 0.35, 0.8).normalize();
   const l = new THREE.DirectionalLight(0xfff1dc, 3.0); l.position.copy(sunDir); mapScene.add(l, new THREE.AmbientLight(0x111a28, 0.4));
   mapScene.environment = envFor('#0a0c10', sunDir, 0.6);
