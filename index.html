@@ -1284,7 +1284,7 @@ addEventListener('keydown', () => { Audio.init(); if (Audio.ctx && Audio.ctx.sta
 const mapScene = new THREE.Scene(); mapScene.background = new THREE.Color(0);
 const mapCam = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.01, 3000);
 const map = { markers: [], labels: [], ship: null, path: [], trail: null, t: 0 };
-const MAPCAM = [{ pos: [9, 3.6, 25], look: [11.6, -3.8, -3] }, { pos: [8.5, 14, 30], look: [8.5, -4.5, -3] }];
+const MAPCAM = [{ pos: [9, 3.6, 25] }, { pos: [8.5, 14, 30], look: [8.5, -4.5, -3] }];
 function buildMap() {
   mapCam.position.set(...MAPCAM[innerWidth < 900 ? 1 : 0].pos);
   const sunDir = V3(-0.5, 0.35, 0.8).normalize();
@@ -1329,10 +1329,18 @@ function updateMap(dt) {
   map.trail.geometry.attributes.position.needsUpdate = true;
   const sel = map.markers[missionIdx].position;
   const narrow = innerWidth < 900;
-  const cfg = MAPCAM[narrow ? 1 : 0];
-  const cam = V3(...cfg.pos).add(V3(Math.sin(map.t * 0.05) * 1.6, Math.sin(map.t * 0.07) * 0.6, 0));
+  let look, cam;
+  if (narrow) { const cfg = MAPCAM[1]; look = V3(...cfg.look).lerp(sel, 0.08); cam = V3(...cfg.pos); }
+  else {
+    // frame the Earth-Moon route inside the area left of the mission panel, whatever the screen shape
+    const dir = V3(-2.6, 7.4, 28).normalize(), f = Math.max(0.35, (innerWidth - 440) / innerWidth);
+    const th = Math.tan(19 * DEG), ht = th * mapCam.aspect, D = 14 / (ht * f);
+    look = V3(6.4, 0.2, -3).addScaledVector(V3(dir.z, 0, -dir.x).normalize(), (1 - f) * D * ht);
+    look.y -= 0.2 * D * th;
+    cam = look.clone().addScaledVector(dir, D);
+  }
+  cam.add(V3(Math.sin(map.t * 0.05) * 1.6, Math.sin(map.t * 0.07) * 0.6, 0));
   mapCam.position.lerp(cam, 1 - Math.exp(-dt * 1.5));
-  const look = V3(...cfg.look).lerp(sel, 0.08);
   mapCam.lookAt(look);
   map.markers.forEach((m, k) => m.scale.setScalar((k === missionIdx ? 0.75 : 0.45) * (1 + 0.15 * Math.sin(map.t * 3 + k))));
   for (const L of map.labels) {
